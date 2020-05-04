@@ -1,59 +1,57 @@
 import { getRepository } from 'typeorm';
 import { Request, Response } from 'express';
+import * as bcrypt from 'bcryptjs';
+import * as jwt from 'jsonwebtoken';
 import { User } from '../entity/User';
 
-export const createUser = async (req: Request, res: Response) => {
-  let user = new User();
-  user = { ...req.body };
+export const register = async (req: Request, res: Response) => {
+  const { name, email, password } = req.body;
 
   const userRepository = getRepository(User);
-
-  await userRepository.save(user);
-  res.send(user);
-};
-
-export const getAllUsers = async (req: Request, res: Response) => {
-  const userRepository = getRepository(User);
-
-  const users = await userRepository.find();
-  res.send(users);
-};
-
-export const getUserById = async (req: Request, res: Response) => {
-  const userRepository = getRepository(User);
-
-  const user = await userRepository.find({
-    id: Number(req.params.id)
+  const existingUser = await userRepository.findOne({
+    email
   });
 
-  res.send(user);
+  if (existingUser) {
+    res.status(400).send({
+      message: 'Email already taken'
+    });
+  } else {
+    const salt = bcrypt.genSaltSync(10);
+    const hashPassword = bcrypt.hashSync(password, salt);
+
+    const user = await userRepository.create({
+      name,
+      email,
+      password: hashPassword
+    });
+
+    await userRepository.save(user);
+
+    res.send({ message: 'User created' });
+  }
 };
 
-export const updateUserById = async (req: Request, res: Response) => {
-  const { name, age, phoneNumber } = req.body;
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
   const userRepository = getRepository(User);
 
-  await userRepository.update(Number(req.params.id), {
-    name,
-    age,
-    phoneNumber
+  const user = await userRepository.findOne({
+    email
   });
 
-  const updatedUser = await userRepository.find({
-    id: Number(req.params.id)
-  });
+  const isSuccess: boolean = bcrypt.compareSync(password, user.password);
 
-  res.send(updatedUser);
-};
+  if (!user || !isSuccess) {
+    res.status(401).send({ message: 'Username or password is wrong' });
+  } else {
+    const payload = {
+      id: user.id
+    };
 
-export const deleteUserById = async (req: Request, res: Response) => {
-  const userRepository = getRepository(User);
+    const token = jwt.sign(payload, 'fsdfsdfearterd', { expiresIn: 3600 });
 
-  const user = await userRepository.find({
-    id: Number(req.params.id)
-  });
-
-  await userRepository.remove(user);
-
-  res.send(`User id ${req.params.id} has been deleted.`);
+    res.status(200).send({ token });
+  }
 };
