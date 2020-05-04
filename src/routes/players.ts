@@ -7,6 +7,9 @@ import {
   updatePlayerById,
   deletePlayerById
 } from '../controllers/players';
+import * as passport from 'passport';
+
+const auth = passport.authenticate('jwt-authentication', { session: false });
 
 const router: Router = express.Router();
 
@@ -15,6 +18,6 @@ router.post('/', createPlayer);
 
 router.get('/:id', getPlayerById);
 router.put('/:id', updatePlayerById);
-router.delete('/:id', deletePlayerById);
+router.delete('/:id', auth, deletePlayerById);
 
 export default router;

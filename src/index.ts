@@ -4,6 +4,7 @@ import * as bodyParser from 'body-parser';
 import { createConnection } from 'typeorm';
 import userRouter from './routes/users';
 import playerRouter from './routes/players';
+import './services/passport';
 
 createConnection().then((connection) => {
   const app: Application = express();
