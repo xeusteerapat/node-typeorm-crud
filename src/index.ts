@@ -1,7 +1,7 @@
 import * as express from 'express';
-import { Application, Request, Response, NextFunction } from 'express';
+import { Application } from 'express';
 import * as bodyParser from 'body-parser';
-import { createConnection, Connection } from 'typeorm';
+import { createConnection } from 'typeorm';
 import userRouter from './routes/users';
 
 createConnection().then((connection) => {
