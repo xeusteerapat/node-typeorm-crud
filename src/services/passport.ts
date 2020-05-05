@@ -3,9 +3,11 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import { getRepository } from 'typeorm';
 import { User } from '../entity/User';
 
+const SECRET_KEY = process.env.SECRET_OR_KEY;
+
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: 'fsdfsdfearterd'
+  secretOrKey: SECRET_KEY
 };
 
 passport.use(

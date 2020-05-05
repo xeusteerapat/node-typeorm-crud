@@ -6,6 +6,9 @@ import userRouter from './routes/users';
 import playerRouter from './routes/players';
 import './services/passport';
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 createConnection().then((connection) => {
   const app: Application = express();
   app.use(bodyParser.json());
@@ -13,7 +16,9 @@ createConnection().then((connection) => {
   app.use('/users', userRouter);
   app.use('/players', playerRouter);
 
-  app.listen(8000, () => {
-    console.log('🔥🔥🔥 Server is listening on port 8000 🔥🔥🔥');
+  const PORT = process.env.PORT;
+
+  app.listen(PORT, () => {
+    console.log(`🔥🔥 Server is listening on port ${PORT} 🔥🔥🔥`);
   });
 });

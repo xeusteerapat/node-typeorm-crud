@@ -4,6 +4,12 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { User } from '../entity/User';
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+const SALT_ROUND = Number(process.env.BCRYPT_SALT_ROUND);
+const SECRET_KEY = process.env.SECRET_OR_KEY;
+
 export const register = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 
@@ -17,7 +23,7 @@ export const register = async (req: Request, res: Response) => {
       message: 'Email already taken'
     });
   } else {
-    const salt = bcrypt.genSaltSync(10);
+    const salt = bcrypt.genSaltSync(SALT_ROUND);
     const hashPassword = bcrypt.hashSync(password, salt);
 
     const user = await userRepository.create({
@@ -50,7 +56,7 @@ export const login = async (req: Request, res: Response) => {
       id: user.id
     };
 
-    const token = jwt.sign(payload, 'fsdfsdfearterd', { expiresIn: 3600 });
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: 3600 });
 
     res.status(200).send({ token });
   }
