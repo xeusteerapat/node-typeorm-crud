@@ -47,17 +47,20 @@ export const login = async (req: Request, res: Response) => {
     email
   });
 
-  const isSuccess: boolean = bcrypt.compareSync(password, user.password);
-
-  if (!user || !isSuccess) {
-    res.status(401).send({ message: 'Username or password is wrong' });
+  if (!user) {
+    res.status(400).send({ message: 'Invalid email or password' });
   } else {
-    const payload = {
-      id: user.id
-    };
+    const isSuccess = bcrypt.compareSync(password, user.password);
 
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: 3600 });
-
-    res.status(200).send({ token });
+    if (isSuccess) {
+      const payload = {
+        id: user.id,
+        name: user.name
+      };
+      const token = jwt.sign(payload, SECRET_KEY, { expiresIn: 3600 });
+      res.status(200).send({ token });
+    } else {
+      res.status(400).send({ message: 'Invalid email or password' });
+    }
   }
 };
