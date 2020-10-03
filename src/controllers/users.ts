@@ -23,8 +23,8 @@ export const register = async (req: Request, res: Response) => {
       message: 'Email already taken'
     });
   } else {
-    const salt = bcrypt.genSaltSync(SALT_ROUND);
-    const hashPassword = bcrypt.hashSync(password, salt);
+    const salt = await bcrypt.genSalt(SALT_ROUND);
+    const hashPassword = await bcrypt.hash(password, salt);
 
     const user = await userRepository.create({
       name,
@@ -50,7 +50,7 @@ export const login = async (req: Request, res: Response) => {
   if (!user) {
     res.status(400).send({ message: 'Invalid email or password' });
   } else {
-    const isSuccess = bcrypt.compareSync(password, user.password);
+    const isSuccess = await bcrypt.compare(password, user.password);
 
     if (isSuccess) {
       const payload = {
